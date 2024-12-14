@@ -55,11 +55,11 @@ Additionally, the challenges of object tracking can be categorized into two comp
 <div style="text-align: center;"> <em>Fig 2: Occlusions While Driving</em> </div>
 <br>
 
-Occlusions: Occlusions occur when an object is partially or fully hidden behind another object or artifact of the environment. In these cases, the object tracking algorithm can struggle to maintain a consistent track. 
+**Occlusions:** Occlusions occur when an object is partially or fully hidden behind another object or artifact of the environment. In these cases, the object tracking algorithm can struggle to maintain a consistent track. 
 
-Object Birth, Death, Permanence: In dynamic scenarios, objects can appear and disappear unpredictably from the model’s field of view. These are regarded as objects of birth and death respectively. These instances require the model to adequately initialize or terminate a track. Additionally, in relation to occlusions, if an object is hidden but still technically in the region of interest, the model must understand that this object still exists and not prematurely terminate its track. 
+**Object Birth, Death, Permanence:** In dynamic scenarios, objects can appear and disappear unpredictably from the model’s field of view. These are regarded as objects of birth and death respectively. These instances require the model to adequately initialize or terminate a track. Additionally, in relation to occlusions, if an object is hidden but still technically in the region of interest, the model must understand that this object still exists and not prematurely terminate its track. 
 
-Environmental Conditions and Artifacts: In addition, variations in the environment like lighting, weather, and sensor noise can change the appearance of an object. This variation can make detection unreliable as the model is unfamiliar with the diversity of settings it is placed in. Additionally, artifacts of sensor errors can block objects in the field of view making detection and tracking inhibited. In the example below, we can see how lighting glare can obstruct the field of view. 
+**Environmental Conditions and Artifacts:** In addition, variations in the environment like lighting, weather, and sensor noise can change the appearance of an object. This variation can make detection unreliable as the model is unfamiliar with the diversity of settings it is placed in. Additionally, artifacts of sensor errors can block objects in the field of view making detection and tracking inhibited. In the example below, we can see how lighting glare can obstruct the field of view. 
 
 <div style="text-align: center;">
   <img src="{{ '/assets/images/20/daylight_scenarios.png' | relative_url }}" alt="Daylight Scenerios" style="width: 350px; max-width: 100%;" />
@@ -67,7 +67,7 @@ Environmental Conditions and Artifacts: In addition, variations in the environme
 <div style="text-align: center;"> <em>Fig 3: Lighting Scenerios</em> </div>
 <br>
 
-##### Challenges associated with with Motion Track:
+##### Challenges associated with with Motion Tracking:
 
 <div style="text-align: center;">
   <img src="{{ '/assets/images/20/motion_tracking.gif' | relative_url }}" alt="Occlusions Example" style="width: 350px; max-width: 100%;" />
@@ -147,7 +147,7 @@ Before exploring the technicalities, we must acknowledge that MITS can be broken
 A ResNet-50 backbone encoder takes in a reference/memory frame represented by
 $$\mathbf{I}_m \in \mathbb{R}^{H_I \times W_I}$$ and encodes the frame into a visual embedding represented by $$\mathbf{X}_m \in \mathbb{R}^{HW \times C}$$ . The Unified Identification module also encodes all reference masks $$\mathbf{Y}_m \in \mathbb{R}^{HW \times N}$$ for the boxes representing $N$ objects into a Unified Identification Embedding, $$\mathbf{E}_{\text{id}} \in \mathbb{R}^{HW \times C}$$ .
 
-The Unified Identification module is expanded upon in a later section. The visual embedding is then distributed to the propagation module. It’s worth noting that an ID embedding can be obtained by assigning ID vectors to $N$ objects for an ID bank that can store $M$ learnable ID vectors.
+The Unified Identification module is expanded upon in a later section. The visual embedding is then distributed to the propagation module. It’s worth noting that an ID embedding can be obtained by assigning ID vectors to <em>N</em> objects for an ID bank that can store <em>M</em> learnable ID vectors.
 
 ##### Spatial-Temporal Propagation
 The embedding for the current frame gets transformed into the query:$$\mathbf{Q}_t \in \mathbb{R}^{THW \times C}$$ along with the memory embedding, which becomes the key $$\mathbf{K}_m \in \mathbb{R}^{THW \times C}$$ and the value, $$\mathbf{V}_m \in\mathbb{R}^{THW \times C}$$ . The propagation module then fuses the ID embedding $$\mathbf{E}_{\text{id}} \in \mathbb{R}^{THW \times C}$$ with the value V<sub>m</sub> and propagates it to the current frame by utilizing the attention mechanism:
@@ -164,9 +164,8 @@ This is the case for any frame with predicted boxes/masks extended to <em>T</em>
 ##### Dual-Branch Decoding
 The last part of the pipeline is to forward the embedding to two branches that deal with predictions: one for predicting masks with a feature pyramid network and the other for predicting boxes through a transformer-based pinpoint box head.
 
-The branch in charge of predicting the mask applies a softmax function on <em>N</em>channels of \( \mathbf{M} \), where the predicted logits are $$\mathbf{S}_m \in\mathbb{R}^{H_s \times W_s \times M}$$ with probability: $$\mathbf{P}_m \in \mathbb{R}^{HW \times N}$$ .Similarly, the box branch uses the probability vectors $$\mathbf{P}_b^{x_1, x_2} \in \mathbb{R}^{H \times 2M}$$ and $$\mathbf{P}_b^{y_1, y_2} \in\mathbb{R}^{H \times 2M}$$ to select <em>N</em> boxes from the <em>M</em>-formed boxes.Putting it all together, the resulting pipeline is characterized by the following image:
+The branch in charge of predicting the mask applies a softmax function on <em>N</em> out of <em>M</em> channels, where the predicted logits are $$\mathbf{S}_m \in\mathbb{R}^{H_s \times W_s \times M}$$ with probability $$\mathbf{P}_m \in \mathbb{R}^{HW \times N}$$ .Similarly, the box branch uses the probability vectors $$\mathbf{P}_b^{x_1, x_2} \in \mathbb{R}^{H \times 2M}$$ and $$\mathbf{P}_b^{y_1, y_2} \in\mathbb{R}^{H \times 2M}$$ to select <em>N</em> boxes from the <em>M</em>-formed boxes. Putting it all together, the resulting pipeline is characterized by the following image:
 
-Putting it all together, the resulting pipeline is characterized by the following image:
 <div style="text-align: center;">
   <img src="{{ '/assets/images/20/mits_pipeline.png' | relative_url }}" alt="Occlusions Example" style="width: 350px; max-width: 100%;" />
 </div>
@@ -193,7 +192,7 @@ The box ID refiner within the module is a transformer made up of self-attention 
 <div style="text-align: center;"> <em>Fig 14: MITS Box ID Refiner</em> </div>
 <br>
 
-In light of I representing the image path and O representing the object path, the two cross-attention layers are used to exchange information between the two paths in the following matter:
+In light of <em>I</em> representing the image path and <em>O</em> representing the object path, the two cross-attention layers are used to exchange information between the two paths in the following matter:
 
 <div style="text-align: center;">
   <img src="{{ '/assets/images/20/mits_cross_attn_representation.png' | relative_url }}" alt="Occlusions Example" style="width: 350px; max-width: 100%;" />
@@ -222,7 +221,7 @@ First, these coordinates are converted into score maps by convolving with layers
 <div style="text-align: center;"> <em>Fig 17: MITS Probability Map Formula</em> </div>
 <br>
 
-The N bounding boxes for N objects, [x1,x2, y1, y2] , can then be predicted by a soft-argmax 
+The <em>N</em> bounding boxes for <em>N</em> objects, [x1,x2, y1, y2] , can then be predicted by a soft-argmax 
 
 <div style="text-align: center;">
   <img src="{{ '/assets/images/20/mits_bounding_box_prediction.png' | relative_url }}" alt="Occlusions Example" style="width: 350px; max-width: 100%;" />
@@ -230,7 +229,7 @@ The N bounding boxes for N objects, [x1,x2, y1, y2] , can then be predicted by a
 <div style="text-align: center;"> <em>Fig 18: MITS Bounding Box Prediction</em> </div>
 <br>
 
-where Cx and Cy are coordinates.
+where <em>C<sub>x</sub></em> and <em>C<sub>y</sub></em> are coordinates.
 
 <div style="text-align: center;">
   <img src="{{ '/assets/images/20/mits_pinpoint_example.png' | relative_url }}" alt="Occlusions Example" style="width: 350px; max-width: 100%;" />
